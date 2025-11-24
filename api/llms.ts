@@ -8,7 +8,8 @@ const WP_SITEMAP_INDEX = 'https://mariahibbs.com/sitemap_index.xml';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
-        const allUrls: { url: string; title: string }[] = [];
+        const mainPages: { url: string; title: string }[] = [];
+        const blogPosts: { url: string; title: string }[] = [];
 
         // Helper to format title from URL
         const formatTitle = (url: string) => {
@@ -16,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         };
 
-        // 1. Fetch Showit URLs
+        // 1. Fetch Showit URLs (Always Main Pages)
         try {
             const showitRes = await axios.get(SHOWIT_SITEMAP);
             const showitXml = await parseStringPromise(showitRes.data);
@@ -24,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 showitXml.urlset.url.forEach((u: any) => {
                     if (u.loc) {
                         const url = u.loc[0];
-                        allUrls.push({ url, title: formatTitle(url) });
+                        mainPages.push({ url, title: formatTitle(url) });
                     }
                 });
             }
@@ -45,7 +46,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
 
             for (const subUrl of subSitemaps) {
-                if (subUrl.includes('page-sitemap') || subUrl.includes('post-sitemap')) {
+                // Distinguish between Pages and Posts
+                const isPost = subUrl.includes('post-sitemap');
+                const isPage = subUrl.includes('page-sitemap');
+
+                if (isPost || isPage) {
                     try {
                         const subRes = await axios.get(subUrl);
                         const subXml = await parseStringPromise(subRes.data);
@@ -53,7 +58,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             subXml.urlset.url.forEach((u: any) => {
                                 if (u.loc) {
                                     const url = u.loc[0];
-                                    allUrls.push({ url, title: formatTitle(url) });
+                                    const item = { url, title: formatTitle(url) };
+                                    if (isPost) {
+                                        blogPosts.push(item);
+                                    } else {
+                                        mainPages.push(item);
+                                    }
                                 }
                             });
                         }
@@ -67,15 +77,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             console.error("Error fetching WP sitemaps", e);
         }
 
-        // Deduplicate by URL
-        const uniqueUrls = Array.from(new Map(allUrls.map(item => [item.url, item])).values());
+        // Deduplicate
+        const uniqueMain = Array.from(new Map(mainPages.map(item => [item.url, item])).values());
+        const uniquePosts = Array.from(new Map(blogPosts.map(item => [item.url, item])).values());
 
         // 3. Generate llms.txt content
-        let txtContent = `# Maria Hibbs Photography\n\n`;
-        txtContent += `> Consolidated content index for AI crawlers.\n\n`;
+        let txtContent = `# Maria Hibbs Photography - Site Index\n\n`;
 
-        txtContent += `## Pages & Posts\n\n`;
-        uniqueUrls.forEach(item => {
+        // Context Description
+        txtContent += `> **About**: Maria Hibbs is a luxury wedding photographer based in Mallorca, Spain. She specializes in capturing intimate, editorial-style weddings and elopements. Her work features natural light, authentic emotion, and the stunning landscapes of the Balearic Islands.\n`;
+        txtContent += `> **Services**: Wedding Photography, Engagement Sessions, Brand Coaching, and Elopements.\n`;
+        txtContent += `> **Locations**: Mallorca, Ibiza, Menorca, Formentera, and international destinations.\n\n`;
+
+        txtContent += `## Main Pages\n`;
+        txtContent += `Core information about services, portfolio, and contact.\n\n`;
+        uniqueMain.forEach(item => {
+            txtContent += `- [${item.title}](${item.url})\n`;
+        });
+
+        txtContent += `\n## Blog & Real Weddings\n`;
+        txtContent += `Detailed stories of real weddings, editorials, and guides.\n\n`;
+        uniquePosts.forEach(item => {
             txtContent += `- [${item.title}](${item.url})\n`;
         });
 
