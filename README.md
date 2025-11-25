@@ -46,16 +46,28 @@ Am Ende sehen Sie ein großes "Congratulations!".
 
 ## 📡 Wie Sie es nutzen
 
+### Wichtige URLs
+
+Alle Endpunkte sind unter dieser Adresse erreichbar: `https://mariahibbs-sitemap.vercel.app`
+
+- **Sitemap (für Google):** `/api/sitemap`
+- **AI Context (llms.txt):** `/llms.txt`
+- **MCP (für AI-Agenten):** `/api/mcp`
+
 ### 1. Für Google (Wichtig!)
 Damit Google Ihre Seite besser findet:
 
-1.  Kopieren Sie Ihre neue Sitemap-Adresse: `https://[IHRE-ADRESSE].vercel.app/api/sitemap`
-    *   (Ersetzen Sie `[IHRE-ADRESSE]` mit dem, was Vercel Ihnen gegeben hat).
-2.  Gehen Sie zur **Google Search Console**.
-3.  Klicken Sie links auf **Sitemaps**.
-4.  Fügen Sie die Adresse dort ein und klicken Sie auf **Senden**.
+1.  Gehen Sie zur **Google Search Console**.
+2.  Klicken Sie links auf **Sitemaps**.
+3.  Fügen Sie diese URL ein: `https://mariahibbs-sitemap.vercel.app/api/sitemap`
+4.  Klicken Sie auf **Senden**.
 
-### 2. Für AI Agenten (Optional)
-Wenn Sie möchten, dass ein AI-Bot Ihre Seite versteht:
+### 2. Für AI-Suchmaschinen (Perplexity & Co.)
+Die llms.txt-Datei ist hier verfügbar:
+- `https://mariahibbs-sitemap.vercel.app/llms.txt`
 
-*   Geben Sie dem Bot diese Adresse: `https://[IHRE-ADRESSE].vercel.app/api/mcp`
+**Hinweis:** Aufgrund von Showit-Einschränkungen kann diese Datei nicht direkt unter `mariahibbs.com/llms.txt` bereitgestellt werden. Die Vercel-URL funktioniert aber genauso gut und ist der offizielle Endpunkt für AI-Bots.
+
+### 3. Für AI Agenten (Optional)
+Wenn Sie möchten, dass ein AI-Bot strukturierten Zugriff hat:
+- `https://mariahibbs-sitemap.vercel.app/api/mcp`
